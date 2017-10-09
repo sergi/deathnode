@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/alanbover/deathnode/aws"
 	"github.com/alanbover/deathnode/deathnode"
-	"github.com/alanbover/deathnode/monitor"
 	"github.com/alanbover/deathnode/mesos"
+	"github.com/alanbover/deathnode/monitor"
 	log "github.com/sirupsen/logrus"
 	"testing"
 	"time"
@@ -262,7 +262,7 @@ func prepareRunParameters(awsConn aws.ClientInterface, mesosConn mesos.ClientInt
 	constraintsType := "noContraint"
 	recommenderType := "smallestInstanceId"
 
-	mesosMonitor := monitor.NewMesosMonitor(mesosConn, protectedFrameworks,protectedTasksLabels)
+	mesosMonitor := monitor.NewMesosMonitor(mesosConn, protectedFrameworks, protectedTasksLabels)
 	autoscalingGroups, _ := monitor.NewAutoscalingGroupMonitors(awsConn, autoscalingGroupsNames, "DEATH_NODE_MARK")
 	notebook := deathnode.NewNotebook(autoscalingGroups, awsConn, mesosMonitor, delayDeleteSeconds, "DEATH_NODE_MARK")
 	deathNodeWatcher := deathnode.NewWatcher(notebook, mesosMonitor, constraintsType, recommenderType)

@@ -79,13 +79,8 @@ func (n *Notebook) DestroyInstancesAttempt() error {
 			continue
 		}
 
-		// If the instance have no tasks from protected frameworks, delete it
-		isProtected := n.mesosMonitor.HasProtectedFrameworksTasks(*instance.PrivateIpAddress)
-
-		// If the instance have no tasks with protected Labels, delete it
-		if !isProtected {
-			isProtected =  n.mesosMonitor.HasProtectedLabelTasks(*instance.PrivateIpAddress)
-		}
+		// If the instance can be killed, delete it
+		isProtected, message := n.mesosMonitor.IsProtected(*instance.PrivateIpAddress)
 
 		if !isProtected {
 			log.Infof("Destroy instance %s", *instance.InstanceId)
@@ -98,7 +93,7 @@ func (n *Notebook) DestroyInstancesAttempt() error {
 				continue
 			}
 		} else {
-			log.Debugf("Instance %s can't be deleted. It contains tasks from protected frameworks", *instance.InstanceId)
+			log.Debugf("Instance %s can't be deleted. %s", *instance.InstanceId, message)
 		}
 	}
 

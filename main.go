@@ -5,16 +5,16 @@ import "flag"
 
 import (
 	"github.com/alanbover/deathnode/aws"
-	"github.com/alanbover/deathnode/monitor"
 	"github.com/alanbover/deathnode/deathnode"
 	"github.com/alanbover/deathnode/mesos"
+	"github.com/alanbover/deathnode/monitor"
 	log "github.com/sirupsen/logrus"
 )
 
 type arrayFlags []string
 
 var accessKey, secretKey, region, iamRole, iamSession, mesosURL, constraintsType, recommenderType, deathNodeMark string
-var autoscalingGroupPrefixes, protectedFrameworks , protectedTasksLabels arrayFlags
+var autoscalingGroupPrefixes, protectedFrameworks, protectedTasksLabels arrayFlags
 var pollingSeconds, delayDeleteSeconds int
 var debug bool
 
@@ -39,7 +39,7 @@ func main() {
 	mesosConn := &mesos.Client{
 		MasterURL: mesosURL,
 	}
-	mesosMonitor := monitor.NewMesosMonitor(mesosConn, protectedFrameworks,protectedTasksLabels)
+	mesosMonitor := monitor.NewMesosMonitor(mesosConn, protectedFrameworks, protectedTasksLabels)
 
 	// Create deathnoteWatcher
 	notebook := deathnode.NewNotebook(autoscalingGroups, awsConn, mesosMonitor, delayDeleteSeconds, deathNodeMark)

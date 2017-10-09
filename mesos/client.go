@@ -62,8 +62,8 @@ type Task struct {
 }
 
 type Labels struct {
-	Key    string `json:"key"`
-	Value  string `json:"value"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // Status is part of the mesos tasks response API endpoint
