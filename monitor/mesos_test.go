@@ -11,7 +11,7 @@ import (
 func TestGetMesosSlaveIdByIp(t *testing.T) {
 
 	Convey("When creating a new mesos monitor", t, func() {
-		monitor := createTestMesosMonitor("")
+		monitor := createTestMesosMonitor("","")
 		monitor.Refresh()
 
 		Convey("GetMesosSlaveByIp should return an slave it if exists", func() {
@@ -28,7 +28,7 @@ func TestGetMesosSlaveIdByIp(t *testing.T) {
 func TestGetMesosFrameworks(t *testing.T) {
 
 	Convey("When creating a new mesos monitor", t, func() {
-		monitor := createTestMesosMonitor("frameworkName1")
+		monitor := createTestMesosMonitor("frameworkName1","")
 
 		Convey("getProtectedFrameworks should return only the ones that match the protected frameworks", func() {
 			frameworks := monitor.getProtectedFrameworks()
@@ -41,7 +41,7 @@ func TestGetMesosFrameworks(t *testing.T) {
 func TestHasProtectedFrameworksTasks(t *testing.T) {
 
 	Convey("When creating a new mesos monitor", t, func() {
-		monitor := createTestMesosMonitor("frameworkName1")
+		monitor := createTestMesosMonitor("frameworkName1","")
 		monitor.Refresh()
 
 		Convey("HasProtectedFrameworksTasks returns", func() {
@@ -54,7 +54,24 @@ func TestHasProtectedFrameworksTasks(t *testing.T) {
 		})
 	})
 }
+/*
+func TestHasProtectedLabelTasks(t *testing.T) {
 
+	Convey("When creating a new mesos monitor", t, func() {
+		monitor := createTestMesosMonitor("","")
+		monitor.Refresh()
+
+		Convey("HasProtectedFrameworksTasks returns", func() {
+			Convey("true if a node have tasks running from protected frameworks", func() {
+				So(monitor.HasProtectedLabelTasks("10.0.0.2"), ShouldBeTrue)
+			})
+			Convey("false if a node doesn't have tasks running from protected frameworks", func() {
+				So(monitor.HasProtectedLabelTasks("10.0.0.4"), ShouldBeFalse)
+			})
+		})
+	})
+}
+*/
 func TestSetMesosAgentsInMaintenance(t *testing.T) {
 	Convey("When generating the payload for a maintenance call", t, func() {
 		mesosConn := &mesos.ClientMock{
@@ -80,13 +97,14 @@ func TestSetMesosAgentsInMaintenance(t *testing.T) {
 	})
 }
 
-func createTestMesosMonitor(protectedFramework string) *MesosMonitor {
+func createTestMesosMonitor(protectedFramework string,protectedTasksLabels string) *MesosMonitor {
 	mesosConn := &mesos.ClientMock{
 		Records: map[string]*[]string{
 			"GetMesosFrameworks": {"default"},
 			"GetMesosSlaves":     {"default"},
 			"GetMesosTasks":      {"default"},
+			"GetMesosTasksWithLabelProtected":      {"default"},
 		},
 	}
-	return NewMesosMonitor(mesosConn, []string{protectedFramework})
+	return NewMesosMonitor(mesosConn, []string{protectedFramework},[]string{protectedTasksLabels})
 }

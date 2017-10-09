@@ -96,8 +96,9 @@ func TestDestroyInstanceAttempt(t *testing.T) {
 func prepareRunParameters(awsConn aws.ClientInterface, mesosConn mesos.ClientInterface, delayDeleteSeconds int) *Notebook {
 
 	protectedFrameworks := []string{"frameworkName1"}
+	protectedTasksLabels := []string{"task1"}
 	autoscalingGroupsNames := []string{"some-Autoscaling-Group"}
-	mesosMonitor := monitor.NewMesosMonitor(mesosConn, protectedFrameworks)
+	mesosMonitor := monitor.NewMesosMonitor(mesosConn, protectedFrameworks,protectedTasksLabels)
 	autoscalingGroups, _ := monitor.NewAutoscalingGroupMonitors(awsConn, autoscalingGroupsNames, "DEATH_NODE_MARK")
 
 	mesosMonitor.Refresh()

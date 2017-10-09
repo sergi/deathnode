@@ -14,6 +14,7 @@ type MesosMonitor struct {
 	mesosConn           mesos.ClientInterface
 	mesosCache          *mesosCache
 	protectedFrameworks []string
+	protectedTasksLabels      []string
 }
 
 // MesosCache stores the objects of the mesosApi in a way that is directly accesible
@@ -24,10 +25,11 @@ type mesosCache struct {
 	tasks      map[string][]mesos.Task
 	frameworks map[string]mesos.Framework
 	slaves     map[string]mesos.Slave
+	tasksWithLabelProtected  map[string][]mesos.Task
 }
 
 // NewMesosMonitor returns a new mesos.monitor object
-func NewMesosMonitor(mesosConn mesos.ClientInterface, protectedFrameworks []string) *MesosMonitor {
+func NewMesosMonitor(mesosConn mesos.ClientInterface, protectedFrameworks []string,protectedTasksLabels []string) *MesosMonitor {
 
 	return &MesosMonitor{
 		mesosConn: mesosConn,
@@ -35,8 +37,10 @@ func NewMesosMonitor(mesosConn mesos.ClientInterface, protectedFrameworks []stri
 			tasks:      map[string][]mesos.Task{},
 			frameworks: map[string]mesos.Framework{},
 			slaves:     map[string]mesos.Slave{},
+			tasksWithLabelProtected: map[string][]mesos.Task{},
 		},
 		protectedFrameworks: protectedFrameworks,
+		protectedTasksLabels: protectedTasksLabels,
 	}
 }
 
@@ -44,8 +48,30 @@ func NewMesosMonitor(mesosConn mesos.ClientInterface, protectedFrameworks []stri
 func (m *MesosMonitor) Refresh() {
 
 	m.mesosCache.tasks = m.getTasks()
+	m.mesosCache.tasksWithLabelProtected = m.getProtectedTasks()
 	m.mesosCache.frameworks = m.getProtectedFrameworks()
 	m.mesosCache.slaves = m.getSlaves()
+}
+
+
+
+func (m *MesosMonitor) getProtectedTasks() map[string][]mesos.Task{
+
+	tasksMap := map[string][]mesos.Task{}
+	tasksResponse, _ := m.mesosConn.GetMesosTasks()
+	for _, task := range tasksResponse.Tasks {
+		if task.State == "TASK_RUNNING" {
+			for _,label := range task.Labels{
+				for _, protectedTasksLabel := range m.protectedTasksLabels {
+				   	    if  label.Key == protectedTasksLabel   && strings.ToUpper(label.Value) == "TRUE" {
+							tasksMap[task.Name] = append(tasksMap[task.Name], task)
+						}
+				}
+			}
+
+		}
+	}
+	return tasksMap
 }
 
 func (m *MesosMonitor) getProtectedFrameworks() map[string]mesos.Framework {
@@ -79,6 +105,8 @@ func (m *MesosMonitor) getAgentIPAddressFromPID(pid string) string {
 	return strings.Split(tmp, ":")[0]
 }
 
+
+
 func (m *MesosMonitor) getTasks() map[string][]mesos.Task {
 
 	tasksMap := map[string][]mesos.Task{}
@@ -90,6 +118,7 @@ func (m *MesosMonitor) getTasks() map[string][]mesos.Task {
 	}
 	return tasksMap
 }
+
 
 // GetMesosAgentByIP returns the Mesos slave that matches a certain IP
 func (m *MesosMonitor) GetMesosAgentByIP(ipAddress string) (mesos.Slave, error) {
@@ -119,6 +148,22 @@ func (m *MesosMonitor) HasProtectedFrameworksTasks(ipAddress string) bool {
 		if ok {
 			return true
 		}
+	}
+
+	return false
+}
+// HasProtectedLabelsTasks returns true if the mesos agent has any label tasks running from any of the
+// protected label.
+func (m *MesosMonitor) HasProtectedLabelTasks(ipAddress string) bool {
+
+	slaveID := m.mesosCache.slaves[ipAddress].ID
+	fmt.Println(m.mesosCache.slaves)
+	slaveTasks := m.mesosCache.tasks[slaveID]
+	for _, task := range slaveTasks {
+			_, ok := m.mesosCache.tasksWithLabelProtected[task.Name]
+			if ok {
+				return true
+			}
 	}
 
 	return false
