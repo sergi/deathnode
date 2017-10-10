@@ -46,11 +46,11 @@ func TestHasProtectedFrameworksTasks(t *testing.T) {
 
 		Convey("HasProtectedFrameworksTasks returns", func() {
 			Convey("true if a node have tasks running from protected frameworks", func() {
-				value, _ := monitor.HasProtectedFrameworksTasks("10.0.0.2")
+				value, _ := monitor.hasProtectedFrameworksTasks("10.0.0.2")
 				So(value, ShouldBeTrue)
 			})
 			Convey("false if a node doesn't have tasks running from protected frameworks", func() {
-				value, _ := monitor.HasProtectedFrameworksTasks("10.0.0.4")
+				value, _ := monitor.hasProtectedFrameworksTasks("10.0.0.4")
 				So(value, ShouldBeFalse)
 			})
 		})
@@ -65,11 +65,11 @@ func TestHasProtectedLabelTasks(t *testing.T) {
 
 		Convey("HasProtectedLabelTasks returns", func() {
 			Convey("true if a node have tasks running from protected labels", func() {
-				value, _ := monitor.HasProtectedLabelTasks("10.0.0.2")
+				value, _ := monitor.hasProtectedLabelTasks("10.0.0.2")
 				So(value, ShouldBeTrue)
 			})
 			Convey("false if a node doesn't have tasks running from protected labels", func() {
-				value, _ := monitor.HasProtectedLabelTasks("10.0.0.4")
+				value, _ := monitor.hasProtectedLabelTasks("10.0.0.4")
 				So(value, ShouldBeFalse)
 			})
 		})
@@ -107,7 +107,6 @@ func createTestMesosMonitor(protectedFramework string, protectedTasksLabels stri
 			"GetMesosFrameworks":              {"default"},
 			"GetMesosSlaves":                  {"default"},
 			"GetMesosTasks":                   {"default"},
-			"GetMesosTasksWithLabelProtected": {"default"},
 		},
 	}
 	return NewMesosMonitor(mesosConn, []string{protectedFramework}, []string{protectedTasksLabels})

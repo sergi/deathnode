@@ -59,6 +59,7 @@ type Task struct {
 	FrameworkID string   `json:"framework_id"`
 	Statuses    []Status `json:"statuses"`
 	Labels      []Labels `json:"labels"`
+	IsProtected bool
 }
 
 type Labels struct {
